@@ -101,23 +101,6 @@ function App() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Year Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="year">Gregorian Year (公历年份)</Label>
-              <Select value={year} onValueChange={setYear}>
-                <SelectTrigger id="year">
-                  <SelectValue placeholder="Select year..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
-                      {y} {y === currentYear && "(Current)"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Month Selection */}
               <div className="space-y-2">
@@ -149,6 +132,23 @@ function App() {
                   placeholder="Day (1-30)"
                 />
               </div>
+            </div>
+
+            {/* Year Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="year">Gregorian Year (公历年份)</Label>
+              <Select value={year} onValueChange={setYear}>
+                <SelectTrigger id="year">
+                  <SelectValue placeholder="Select year..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={y.toString()}>
+                      {y} {y === currentYear && "(Current)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Leap Month Option */}
