@@ -4,7 +4,7 @@ import ChevronRight from "lucide-react/dist/esm/icons/chevron-right"
 import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 function Calendar({
   className,
@@ -60,10 +60,28 @@ function Calendar({
       }}
       components={{
         PreviousMonthButton: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
+          <Button
+            variant="outline"
+            className={cn(
+              "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+              className
+            )}
+            {...props}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
         ),
         NextMonthButton: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
+          <Button
+            variant="outline"
+            className={cn(
+              "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+              className
+            )}
+            {...props}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
         ),
       }}
       {...props}
