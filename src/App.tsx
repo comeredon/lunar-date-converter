@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Lunar, Solar } from 'lunar-typescript'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Calendar, ArrowRight } from "@phosphor-icons/react"
 
 function App() {
+  // Dark mode: set html class based on device preference
+  useEffect(() => {
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const updateTheme = () => {
+      if (darkQuery.matches) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
+    updateTheme()
+    darkQuery.addEventListener('change', updateTheme)
+    return () => darkQuery.removeEventListener('change', updateTheme)
+  }, [])
   const currentYear = new Date().getFullYear()
   const [language, setLanguage] = useState<'EN' | 'CN'>('EN')
   const [year, setYear] = useState<string>(currentYear.toString())
