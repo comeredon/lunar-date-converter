@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Calendar, ArrowRight, Translate } from "@phosphor-icons/react"
+import { Calendar, ArrowRight } from "@phosphor-icons/react"
 
 function App() {
   const currentYear = new Date().getFullYear()
