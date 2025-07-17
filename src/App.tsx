@@ -248,9 +248,9 @@ function App() {
             <CardTitle className="text-lg">How to Use</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
-            <p>1. Select the Gregorian year that contains your lunar date</p>
-            <p>2. Choose the lunar month (农历月) from the dropdown</p>
-            <p>3. Enter the lunar day (农历日) - typically 1-30</p>
+            <p>1. Choose the lunar month (农历月) from the dropdown</p>
+            <p>2. Enter the lunar day (农历日) - typically 1-30</p>
+            <p>3. Select the Gregorian year that contains your lunar date</p>
             <p>4. Check "Leap Month" if this is a leap month (闰月)</p>
             <p>5. Click "Convert" to see the equivalent Gregorian date</p>
             <p className="pt-2 text-xs">
