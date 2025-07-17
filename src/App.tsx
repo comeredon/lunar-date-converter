@@ -267,7 +267,7 @@ function App() {
                     {language === 'EN' ? 'Gregorian Date' : '公历日期'}
                   </h3>
                   <div className="text-2xl font-display font-medium text-accent-foreground">
-                    {result.toFullString()}
+                    {result.getYear()}-{result.getMonth().toString().padStart(2, '0')}-{result.getDay().toString().padStart(2, '0')}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {new Date(result.getYear(), result.getMonth() - 1, result.getDay()).toLocaleDateString(
