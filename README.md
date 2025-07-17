@@ -1,23 +1,88 @@
-# ✨ Welcome to Your Spark Template!
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# 🌙 Lunar Date Converter
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+A tool for converting between Gregorian and lunar calendar dates.
 
-🚀 What's Inside?
-- A clean, minimal Spark environment
-- Pre-configured for local development
-- Ready to scale with your ideas
-  
-🧠 What Can You Do?
+## 📝 Description
 
-Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+Lunar Date Converter is a utility that allows users to easily convert dates between the Gregorian calendar and various lunar calendar systems. This tool supports accurate conversions while accounting for the complexities of lunar calendars.
 
-🧹 Just Exploring?
-No problem! If you were just checking things out and don’t need to keep this code:
+## ✨ Features
 
-- Simply delete your Spark.
-- Everything will be cleaned up — no traces left behind.
+- Convert dates from Gregorian to lunar calendar
+- Convert dates from lunar to Gregorian calendar
+- Support for multiple lunar calendar systems
+- Simple and intuitive user interface
+- High accuracy conversion algorithms
 
-📄 License For Spark Template Resources 
+## 🚀 Getting Started
 
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+### Prerequisites
+
+- [List any prerequisites here]
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/comeredon/lunar-date-converter.git
+
+# Navigate to the project directory
+cd lunar-date-converter
+
+# Install dependencies
+npm install
+```
+
+### Usage
+
+```javascript
+// Example code showing how to use the converter
+const { convertToLunar } = require('./converter');
+
+const gregorianDate = new Date(2025, 6, 17); // July 17, 2025
+const lunarDate = convertToLunar(gregorianDate);
+console.log(lunarDate);
+```
+
+## 🏗️ Project Structure
+
+```
+lunar-date-converter/
+├── src/              # Source code
+│   ├── converter/    # Conversion logic
+│   ├── utils/        # Utility functions
+│   └── index.js      # Main entry point
+├── tests/            # Test files
+├── docs/             # Documentation
+└── README.md         # This file
+```
+
+## 🧪 Testing
+
+```bash
+# Run tests
+npm test
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👏 Acknowledgments
+
+- List any resources, libraries, or inspiration here
+
+---
+
+Last updated: 2025-07-17 09:38:12 UTC  
+Maintained by: [@comeredon](https://github.com/comeredon)
