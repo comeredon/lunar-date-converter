@@ -9,16 +9,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Calendar, ArrowRight } from "@phosphor-icons/react"
 
 function App() {
-  const [year, setYear] = useState<string>("")
+  const currentYear = new Date().getFullYear()
+  const [year, setYear] = useState<string>(currentYear.toString())
   const [lunarMonth, setLunarMonth] = useState<string>("")
   const [lunarDay, setLunarDay] = useState<string>("")
   const [isLeapMonth, setIsLeapMonth] = useState<boolean>(false)
   const [result, setResult] = useState<Solar | null>(null)
   const [error, setError] = useState<string>("")
 
-  // Generate year options (1900-2100, which is the range supported by the library)
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 201 }, (_, i) => 1900 + i)
+  // Generate year options (current year to 2100, which is the range supported by the library)
+  const years = Array.from({ length: 2100 - currentYear + 1 }, (_, i) => currentYear + i)
 
   // Generate month options (1-12)
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -38,8 +38,8 @@ function App() {
     const dayNum = parseInt(lunarDay)
 
     // Validate ranges
-    if (yearNum < 1900 || yearNum > 2100) {
-      setError("Year must be between 1900 and 2100")
+    if (yearNum < currentYear || yearNum > 2100) {
+      setError(`Year must be between ${currentYear} and 2100`)
       return
     }
 
@@ -254,7 +254,7 @@ function App() {
             <p>4. Check "Leap Month" if this is a leap month (闰月)</p>
             <p>5. Click "Convert" to see the equivalent Gregorian date</p>
             <p className="pt-2 text-xs">
-              <strong>Note:</strong> This converter supports dates from 1900 to 2100 and follows traditional Chinese lunar calendar calculations.
+              <strong>Note:</strong> This converter supports dates from {currentYear} to 2100 and follows traditional Chinese lunar calendar calculations.
             </p>
           </CardContent>
         </Card>
