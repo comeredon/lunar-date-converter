@@ -83,25 +83,20 @@ function App() {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Language Navigation */}
         <div className="flex justify-center mb-6">
-          <div className="flex bg-card border border-border rounded-lg p-1">
-            <Button
-              variant={language === 'EN' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setLanguage('EN')}
-              className="flex items-center gap-2"
+          <div className="flex items-center gap-4 bg-card border border-border rounded-lg px-4 py-2">
+            <span className={`text-sm font-medium ${language === 'EN' ? 'text-primary' : 'text-muted-foreground'}`}>EN</span>
+            <button
+              type="button"
+              aria-label="Toggle language"
+              className={`relative w-14 h-7 bg-input rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50`}
+              onClick={() => setLanguage(language === 'EN' ? 'CN' : 'EN')}
             >
-              <Translate size={16} />
-              EN
-            </Button>
-            <Button
-              variant={language === 'CN' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setLanguage('CN')}
-              className="flex items-center gap-2"
-            >
-              <Translate size={16} />
-              CN
-            </Button>
+              <span
+                className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-primary transition-transform duration-200 ${language === 'EN' ? '' : 'translate-x-7'}`}
+                style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+              />
+            </button>
+            <span className={`text-sm font-medium ${language === 'CN' ? 'text-primary' : 'text-muted-foreground'}`}>CN</span>
           </div>
         </div>
 
