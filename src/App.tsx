@@ -9,6 +9,43 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Calendar, ArrowRight } from "@phosphor-icons/react"
 
 function App() {
+  // Helper to download ICS file
+  const downloadICS = async () => {
+    if (!result) return;
+    const eventName = window.prompt(language === 'EN' ? 'Enter event name:' : '输入事件名称:');
+    if (!eventName) return;
+    // Gregorian date
+    const year = result.getYear();
+    const month = result.getMonth().toString().padStart(2, '0');
+    const day = result.getDay().toString().padStart(2, '0');
+    // All-day event
+    const dtStart = `${year}${month}${day}`;
+    const dtEnd = `${year}${month}${(parseInt(day)+1).toString().padStart(2, '0')}`;
+    const dtStamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+    const uid = `${dtStart}-${Math.random().toString(36).substring(2, 10)}@lunar-date-converter`;
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${dtStamp}Z`,
+      `SUMMARY:${eventName}`,
+      `DTSTART;VALUE=DATE:${dtStart}`,
+      `DTEND;VALUE=DATE:${dtEnd}`,
+      'DESCRIPTION=Lunar Date Conversion',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    const blob = new Blob([ics], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${eventName}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
   // Dark mode: set html class based on device preference
   useEffect(() => {
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -288,6 +325,13 @@ function App() {
                     })}
                   </div>
                 </div>
+              </div>
+
+              {/* Download ICS Button */}
+              <div className="flex justify-center pt-2">
+                <Button variant="secondary" onClick={downloadICS}>
+                  {language === 'EN' ? 'Download Calendar Event (.ics)' : '下载日历事件 (.ics)'}
+                </Button>
               </div>
 
               {/* Additional Information */}
