@@ -64,7 +64,7 @@ function App() {
       const lunar = Lunar.fromYmd(yearNum, actualMonth, dayNum)
       const solar = lunar.getSolar()
       setResult(solar)
-    } catch (err) {
+    } catch {
       setError(language === 'EN' ? 
         "Invalid lunar date. Please check your input values." :
         "无效的农历日期。请检查您的输入值。")
