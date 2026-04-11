@@ -241,25 +241,11 @@ function App() {
           <h1 className="text-4xl font-display font-semibold text-foreground mb-2">
             {language === 'EN' ? 'Chinese Lunar Calendar Converter' : '农历转公历'}
           </h1>
-          {language === 'EN' ? (
-            <>
-              <h2 className="text-2xl font-display font-medium text-muted-foreground mb-4">
-                Lunar to Gregorian Date Conversion
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Convert Chinese lunar calendar dates to Gregorian calendar dates with precision and cultural accuracy.
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-display font-medium text-muted-foreground mb-4">
-                中国农历日期转换器
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                精确地将中国农历日期转换为公历日期，保持文化准确性。
-              </p>
-            </>
-          )}
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {language === 'EN'
+              ? 'Convert Chinese lunar calendar dates to Gregorian calendar dates with precision and cultural accuracy.'
+              : '精确地将中国农历日期转换为公历日期，保持文化准确性。'}
+          </p>
         </div>
 
         {/* Main Converter Card */}
