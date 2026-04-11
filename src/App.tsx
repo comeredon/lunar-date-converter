@@ -371,7 +371,7 @@ function App() {
                   <SelectContent side="bottom" avoidCollisions={false} className="max-h-[180px]">
                     {years.map((y) => (
                       <SelectItem key={y} value={y.toString()}>
-                        {y} {y === currentYear && (language === 'EN' ? '(Current)' : '(当前)')}
+                        {y}
                       </SelectItem>
                     ))}
                   </SelectContent>
