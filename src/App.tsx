@@ -8,45 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Calendar, ArrowRight, Sun, Moon, DownloadSimple } from "@phosphor-icons/react"
 
 function App() {
-  // Helper to download ICS file
-  const downloadICS = async () => {
-    if (!result) return;
-    const eventName = window.prompt(language === 'EN' ? 'Enter event name:' : '输入事件名称:');
-    if (!eventName) return;
-    // Gregorian date
-    const year = result.getYear();
-    const month = result.getMonth().toString().padStart(2, '0');
-    const day = result.getDay().toString().padStart(2, '0');
-    // All-day event
-    const dtStart = `${year}${month}${day}`;
-    const dtEnd = `${year}${month}${(parseInt(day)+1).toString().padStart(2, '0')}`;
-    const dtStamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
-    const randomBytes = window.crypto.getRandomValues(new Uint8Array(4));
-    const randomSuffix = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
-    const uid = `${dtStart}-${randomSuffix}@lunar-date-converter`;
-    const ics = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'BEGIN:VEVENT',
-      `UID:${uid}`,
-      `DTSTAMP:${dtStamp}Z`,
-      `SUMMARY:${eventName}`,
-      `DTSTART;VALUE=DATE:${dtStart}`,
-      `DTEND;VALUE=DATE:${dtEnd}`,
-      'DESCRIPTION=Lunar Date Conversion',
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\r\n');
-    const blob = new Blob([ics], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${eventName}.ics`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
   // Dark mode state
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
@@ -85,7 +46,9 @@ function App() {
     return () => darkQuery.removeEventListener('change', updateTheme)
   }, [])
   const currentYear = new Date().getFullYear()
-  const [language, setLanguage] = useState<'EN' | 'CN'>('EN')
+  const [language, setLanguage] = useState<'EN' | 'CN'>(() =>
+    navigator.language.startsWith('zh') ? 'CN' : 'EN'
+  )
   const [year, setYear] = useState<string>(currentYear.toString())
   const [lunarMonth, setLunarMonth] = useState<string>("")
   const [lunarDay, setLunarDay] = useState<string>("")
@@ -453,13 +416,6 @@ function App() {
                     })}
                   </div>
                 </div>
-              </div>
-
-              {/* Download ICS Button */}
-              <div className="flex justify-center pt-2">
-                <Button variant="secondary" onClick={downloadICS}>
-                  {language === 'EN' ? 'Download Calendar Event (.ics)' : '下载日历事件 (.ics)'}
-                </Button>
               </div>
 
               {/* Additional Information */}
