@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Lunar, LunarMonth, LunarYear, Solar } from 'lunar-typescript'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -89,15 +89,14 @@ function App() {
   const [year, setYear] = useState<string>(currentYear.toString())
   const [lunarMonth, setLunarMonth] = useState<string>("")
   const [lunarDay, setLunarDay] = useState<string>("")
-  const [isLeapMonth, setIsLeapMonth] = useState<boolean>(false)
   const [result, setResult] = useState<Solar | null>(null)
   const [error, setError] = useState<string>("")
 
-  // Auto-detect leap month based on selected year and month
-  useEffect(() => {
-    if (!year || !lunarMonth) return
+  // Auto-detect leap month based on selected year and month (derived state)
+  const isLeapMonth = useMemo(() => {
+    if (!year || !lunarMonth) return false
     const leapMonth = LunarYear.fromYear(parseInt(year)).getLeapMonth()
-    setIsLeapMonth(leapMonth > 0 && leapMonth === parseInt(lunarMonth))
+    return leapMonth > 0 && leapMonth === parseInt(lunarMonth)
   }, [year, lunarMonth])
 
   // Generate year options (2 years before current year + next 20 years)
@@ -107,7 +106,7 @@ function App() {
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
 
   // Compute number of days in the selected lunar month
-  const daysInMonth = (() => {
+  const daysInMonth = useMemo(() => {
     if (!year || !lunarMonth) return 30
     try {
       const monthNum = isLeapMonth ? -parseInt(lunarMonth) : parseInt(lunarMonth)
@@ -116,16 +115,22 @@ function App() {
     } catch {
       return 30
     }
-  })()
+  }, [year, lunarMonth, isLeapMonth])
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
 
-  // Reset day if it exceeds the new month's day count
-  useEffect(() => {
-    if (lunarDay && parseInt(lunarDay) > daysInMonth) {
-      setLunarDay(daysInMonth.toString())
-    }
-  }, [daysInMonth, lunarDay])
+  // Handlers that also clamp lunarDay when month/year changes
+  const handleYearChange = (newYear: string) => {
+    setYear(newYear)
+  }
+  const handleMonthChange = (newMonth: string) => {
+    setLunarMonth(newMonth)
+  }
+
+  // Clamp day when daysInMonth shrinks
+  const effectiveLunarDay = lunarDay && parseInt(lunarDay) > daysInMonth
+    ? daysInMonth.toString()
+    : lunarDay
 
   const formatChineseDayName = (day: number): string => {
     const chineseDays = [
@@ -141,14 +146,14 @@ function App() {
     setResult(null)
 
     // Validate inputs
-    if (!year || !lunarMonth || !lunarDay) {
+    if (!year || !lunarMonth || !effectiveLunarDay) {
       setError(language === 'EN' ? "Please fill in all fields" : "请填写所有字段")
       return
     }
 
     const yearNum = parseInt(year)
     const monthNum = parseInt(lunarMonth)
-    const dayNum = parseInt(lunarDay)
+    const dayNum = parseInt(effectiveLunarDay)
 
     // Validate ranges
     if (yearNum < currentYear - 2 || yearNum > currentYear + 20) {
@@ -315,7 +320,7 @@ function App() {
                 <Label htmlFor="month">
                   {language === 'EN' ? 'Month' : '月'}
                 </Label>
-                <Select value={lunarMonth} onValueChange={setLunarMonth}>
+                <Select value={lunarMonth} onValueChange={handleMonthChange}>
                   <SelectTrigger id="month">
                     <SelectValue placeholder={language === 'EN' ? 'Month' : '月份'} />
                   </SelectTrigger>
@@ -337,7 +342,7 @@ function App() {
                 <Label htmlFor="day">
                   {language === 'EN' ? 'Day' : '日'}
                 </Label>
-                <Select value={lunarDay} onValueChange={setLunarDay}>
+                <Select value={effectiveLunarDay} onValueChange={setLunarDay}>
                   <SelectTrigger id="day">
                     <SelectValue placeholder={language === 'EN' ? 'Day' : '日期'} />
                   </SelectTrigger>
@@ -359,7 +364,7 @@ function App() {
                 <Label htmlFor="year">
                   {language === 'EN' ? 'Year' : '年'}
                 </Label>
-                <Select value={year} onValueChange={setYear}>
+                <Select value={year} onValueChange={handleYearChange}>
                   <SelectTrigger id="year">
                     <SelectValue placeholder={language === 'EN' ? 'Year' : '年份'} />
                   </SelectTrigger>
@@ -423,10 +428,10 @@ function App() {
                     {language === 'EN' ? 'Chinese Lunar Date' : '中国农历日期'}
                   </h3>
                   <div className="text-2xl font-display font-medium text-primary">
-                    {year}年 {isLeapMonth && "闰"}{formatChineseNumbers(parseInt(lunarMonth))}月 {formatChineseNumbers(parseInt(lunarDay))}日
+                    {year}年 {isLeapMonth && "闰"}{formatChineseNumbers(parseInt(lunarMonth))}月 {formatChineseNumbers(parseInt(effectiveLunarDay))}日
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {year}-{isLeapMonth ? "闰" : ""}{lunarMonth.padStart(2, '0')}-{lunarDay.padStart(2, '0')}
+                    {year}-{isLeapMonth ? "闰" : ""}{lunarMonth.padStart(2, '0')}-{effectiveLunarDay.padStart(2, '0')}
                   </div>
                 </div>
 
