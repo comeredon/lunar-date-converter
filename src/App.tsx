@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Lunar, Solar } from 'lunar-typescript'
+import { Lunar, LunarMonth, LunarYear, Solar } from 'lunar-typescript'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Calendar, ArrowRight } from "@phosphor-icons/react"
+import { Calendar, ArrowRight, Sun, Moon, DownloadSimple } from "@phosphor-icons/react"
 
 function App() {
   // Helper to download ICS file
@@ -48,15 +48,39 @@ function App() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+  // Dark mode state
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [showIOSInstall, setShowIOSInstall] = useState(false)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+
+  // Listen for PWA install prompt (Android/Chrome)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') setDeferredPrompt(null)
+    } else {
+      setShowIOSInstall(true)
+    }
+  }
   // Dark mode: set html class based on device preference
   useEffect(() => {
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const updateTheme = () => {
-      if (darkQuery.matches) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
+      const dark = darkQuery.matches
+      document.documentElement.classList.toggle('dark', dark)
+      setIsDark(dark)
     }
     updateTheme()
     darkQuery.addEventListener('change', updateTheme)
@@ -71,11 +95,48 @@ function App() {
   const [result, setResult] = useState<Solar | null>(null)
   const [error, setError] = useState<string>("")
 
-  // Generate year options (current year + next 20 years)
-  const years = Array.from({ length: 21 }, (_, i) => currentYear + i)
+  // Auto-detect leap month based on selected year and month
+  useEffect(() => {
+    if (!year || !lunarMonth) return
+    const leapMonth = LunarYear.fromYear(parseInt(year)).getLeapMonth()
+    setIsLeapMonth(leapMonth > 0 && leapMonth === parseInt(lunarMonth))
+  }, [year, lunarMonth])
+
+  // Generate year options (2 years before current year + next 20 years)
+  const years = Array.from({ length: 23 }, (_, i) => currentYear - 2 + i)
 
   // Generate month options (1-12)
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
+
+  // Compute number of days in the selected lunar month
+  const daysInMonth = (() => {
+    if (!year || !lunarMonth) return 30
+    try {
+      const monthNum = isLeapMonth ? -parseInt(lunarMonth) : parseInt(lunarMonth)
+      const lm = LunarMonth.fromYm(parseInt(year), monthNum)
+      return lm ? lm.getDayCount() : 30
+    } catch {
+      return 30
+    }
+  })()
+
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+
+  // Reset day if it exceeds the new month's day count
+  useEffect(() => {
+    if (lunarDay && parseInt(lunarDay) > daysInMonth) {
+      setLunarDay(daysInMonth.toString())
+    }
+  }, [daysInMonth, lunarDay])
+
+  const formatChineseDayName = (day: number): string => {
+    const chineseDays = [
+      '', '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+      '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+      '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'
+    ]
+    return chineseDays[day] || day.toString()
+  }
 
   const handleConvert = () => {
     setError("")
@@ -92,10 +153,10 @@ function App() {
     const dayNum = parseInt(lunarDay)
 
     // Validate ranges
-    if (yearNum < currentYear || yearNum > currentYear + 20) {
+    if (yearNum < currentYear - 2 || yearNum > currentYear + 20) {
       setError(language === 'EN' ? 
-        `Year must be between ${currentYear} and ${currentYear + 20}` :
-        `年份必须在${currentYear}年到${currentYear + 20}年之间`)
+        `Year must be between ${currentYear - 2} and ${currentYear + 20}` :
+        `年份必须在${currentYear - 2}年到${currentYear + 20}年之间`)
       return
     }
 
@@ -133,7 +194,63 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 max-w-2xl relative">
+        {/* Top Right Controls */}
+        <div className="absolute top-8 right-4 flex items-center gap-1.5">
+          {/* Install App Button */}
+          {!isStandalone && (
+            <button
+              type="button"
+              aria-label="Install app"
+              onClick={handleInstall}
+              className="p-1.5 rounded-md border border-border bg-card text-foreground hover:bg-accent transition-colors"
+            >
+              <DownloadSimple size={16} />
+            </button>
+          )}
+          {/* Dark Mode Toggle */}
+          <button
+            type="button"
+            aria-label="Toggle dark mode"
+            onClick={() => {
+              const next = !isDark
+              setIsDark(next)
+              document.documentElement.classList.toggle('dark', next)
+            }}
+            className="p-1.5 rounded-md border border-border bg-card text-foreground hover:bg-accent transition-colors"
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
+
+        {/* iOS Install Instructions */}
+        {showIOSInstall && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={() => setShowIOSInstall(false)}>
+            <div className="bg-card border border-border rounded-t-2xl p-6 w-full max-w-md mb-0" onClick={(e) => e.stopPropagation()}>
+              <h3 className="font-semibold text-foreground mb-3 text-center">
+                {language === 'EN' ? 'Install this App' : '安装此应用'}
+              </h3>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>{language === 'EN'
+                  ? '1. Tap the Share button in Safari (the square with an arrow)'
+                  : '1. 点击 Safari 中的分享按钮（带箭头的方框）'}</p>
+                <p>{language === 'EN'
+                  ? '2. Scroll down and tap "Add to Home Screen"'
+                  : '2. 向下滑动并点击"添加到主屏幕"'}</p>
+                <p>{language === 'EN'
+                  ? '3. Tap "Add" to install'
+                  : '3. 点击"添加"完成安装'}</p>
+              </div>
+              <button
+                onClick={() => setShowIOSInstall(false)}
+                className="mt-4 w-full py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium"
+              >
+                {language === 'EN' ? 'Got it' : '知道了'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Language Navigation */}
         <div className="flex justify-center mb-6">
           <div className="flex items-center gap-4 bg-card border border-border rounded-lg px-4 py-2">
@@ -194,22 +311,22 @@ function App() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex justify-between gap-2">
               {/* Month Selection */}
               <div className="space-y-2">
                 <Label htmlFor="month">
-                  {language === 'EN' ? 'Lunar Month' : '农历月'}
+                  {language === 'EN' ? 'Month' : '月'}
                 </Label>
                 <Select value={lunarMonth} onValueChange={setLunarMonth}>
                   <SelectTrigger id="month">
-                    <SelectValue placeholder={language === 'EN' ? 'Month...' : '选择月份...'} />
+                    <SelectValue placeholder={language === 'EN' ? 'Month' : '月份'} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent side="bottom" avoidCollisions={false} className="max-h-[180px]">
                     {months.map((m) => (
                       <SelectItem key={m} value={m.toString()}>
                         {language === 'EN' ? 
-                          `Month ${m} (${formatChineseNumbers(m)}月)` :
-                          `${formatChineseNumbers(m)}月 (${m})`
+                          `${m} (${formatChineseNumbers(m)}月)` :
+                          `${formatChineseNumbers(m)}月`
                         }
                       </SelectItem>
                     ))}
@@ -217,40 +334,46 @@ function App() {
                 </Select>
               </div>
 
-              {/* Day Input */}
+              {/* Day Selection */}
               <div className="space-y-2">
                 <Label htmlFor="day">
-                  {language === 'EN' ? 'Lunar Day' : '农历日'}
+                  {language === 'EN' ? 'Day' : '日'}
                 </Label>
-                <Input
-                  id="day"
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={lunarDay}
-                  onChange={(e) => setLunarDay(e.target.value)}
-                  placeholder={language === 'EN' ? 'Day (1-30)' : '日期 (1-30)'}
-                />
+                <Select value={lunarDay} onValueChange={setLunarDay}>
+                  <SelectTrigger id="day">
+                    <SelectValue placeholder={language === 'EN' ? 'Day' : '日期'} />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" avoidCollisions={false} className="max-h-[180px]">
+                    {days.map((d) => (
+                      <SelectItem key={d} value={d.toString()}>
+                        {language === 'EN' ?
+                          `${d} (${formatChineseDayName(d)})` :
+                          `${formatChineseDayName(d)}`
+                        }
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
 
-            {/* Year Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="year">
-                {language === 'EN' ? 'Gregorian Year' : '公历年份'}
-              </Label>
-              <Select value={year} onValueChange={setYear}>
-                <SelectTrigger id="year">
-                  <SelectValue placeholder={language === 'EN' ? 'Select year...' : '选择年份...'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
-                      {y} {y === currentYear && (language === 'EN' ? '(Current)' : '(当前)')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Year Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="year">
+                  {language === 'EN' ? 'Year' : '年'}
+                </Label>
+                <Select value={year} onValueChange={setYear}>
+                  <SelectTrigger id="year">
+                    <SelectValue placeholder={language === 'EN' ? 'Year' : '年份'} />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" avoidCollisions={false} className="max-h-[180px]">
+                    {years.map((y) => (
+                      <SelectItem key={y} value={y.toString()}>
+                        {y} {y === currentYear && (language === 'EN' ? '(Current)' : '(当前)')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Leap Month Option */}
@@ -259,8 +382,8 @@ function App() {
                 id="leap-month"
                 type="checkbox"
                 checked={isLeapMonth}
-                onChange={(e) => setIsLeapMonth(e.target.checked)}
-                className="h-4 w-4 text-primary border-border rounded focus:ring-primary"
+                disabled
+                className="h-4 w-4 text-primary border-border rounded focus:ring-primary disabled:opacity-60"
               />
               <Label htmlFor="leap-month" className="text-sm">
                 {language === 'EN' ? 'Leap Month' : '闰月'}
@@ -384,7 +507,7 @@ function App() {
                 <p>1. Choose the lunar month from the dropdown</p>
                 <p>2. Enter the lunar day - typically 1-30</p>
                 <p>3. Select the Gregorian year that contains your lunar date</p>
-                <p>4. Check "Leap Month" if this is a leap month</p>
+                <p>4. "Leap Month" is automatically checked when the selected year and month correspond to a leap month</p>
                 <p>5. Click "Convert" to see the equivalent Gregorian date</p>
                 <p className="pt-2 text-xs">
                   <strong>Note:</strong> This converter supports dates from {currentYear} to {currentYear + 20} and follows traditional Chinese lunar calendar calculations.
@@ -395,7 +518,7 @@ function App() {
                 <p>1. 从下拉菜单中选择农历月份</p>
                 <p>2. 输入农历日期 - 通常为1-30</p>
                 <p>3. 选择包含您农历日期的公历年份</p>
-                <p>4. 如果是闰月请勾选"闰月"</p>
+                <p>4. 当所选年份和月份对应闰月时，"闰月"会自动勾选</p>
                 <p>5. 点击"转换"查看相应的公历日期</p>
                 <p className="pt-2 text-xs">
                   <strong>注意：</strong> 此转换器支持{currentYear}年到{currentYear + 20}年的日期，遵循传统中国农历计算方法。
