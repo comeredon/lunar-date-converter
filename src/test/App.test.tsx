@@ -13,15 +13,14 @@ describe('App', () => {
     render(<App />)
     
     expect(screen.getByText('Date Conversion')).toBeInTheDocument()
-    expect(screen.getByText('Lunar Month')).toBeInTheDocument()
-    expect(screen.getByText('Lunar Day')).toBeInTheDocument()
-    expect(screen.getByText('Gregorian Year')).toBeInTheDocument()
+    expect(screen.getByLabelText('Month')).toBeInTheDocument()
+    expect(screen.getByLabelText('Day')).toBeInTheDocument()
+    expect(screen.getByLabelText('Year')).toBeInTheDocument()
   })
 
-  it('renders language toggle buttons', () => {
+  it('renders language toggle', () => {
     render(<App />)
     
-    expect(screen.getByRole('button', { name: /EN/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /CN/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /toggle language/i })).toBeInTheDocument()
   })
 })
