@@ -22,7 +22,9 @@ function App() {
     const dtStart = `${year}${month}${day}`;
     const dtEnd = `${year}${month}${(parseInt(day)+1).toString().padStart(2, '0')}`;
     const dtStamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
-    const uid = `${dtStart}-${Math.random().toString(36).substring(2, 10)}@lunar-date-converter`;
+    const randomBytes = window.crypto.getRandomValues(new Uint8Array(4));
+    const randomSuffix = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
+    const uid = `${dtStart}-${randomSuffix}@lunar-date-converter`;
     const ics = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
