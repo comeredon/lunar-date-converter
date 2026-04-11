@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Lunar, LunarMonth, LunarYear, Solar } from 'lunar-typescript'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -52,7 +51,6 @@ function App() {
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showIOSInstall, setShowIOSInstall] = useState(false)
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
 
   // Listen for PWA install prompt (Android/Chrome)
