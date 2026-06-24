@@ -238,6 +238,7 @@ function App() {
 
         {/* Header */}
         <div className="text-center mb-8">
+          <div className="text-3xl mb-2 select-none" aria-hidden="true">🏮 🐉 🏮</div>
           <h1 className="text-4xl font-display font-semibold text-foreground mb-2">
             {language === 'EN' ? 'Chinese Lunar Calendar Converter' : '农历转公历'}
           </h1>
